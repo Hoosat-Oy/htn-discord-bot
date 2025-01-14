@@ -30,7 +30,7 @@ async def update_funding_wallet_balance(channel):
         else:
             formatted_balance = f"{balance:.2f}"
         formatted_balance = formatted_balance.replace('.', '․')
-        activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: ${formatted_balance}")
+        activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: {formatted_balance}")
         await client.change_presence(activity=activity)
         new_name = f"💸 ${formatted_balance} HTN LISTING"
         await channel.edit(name=new_name)
