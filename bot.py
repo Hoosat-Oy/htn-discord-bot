@@ -8,6 +8,7 @@ TOKEN = os.getenv('TOKEN')
 PRICE_CHANNEL_ID = int(os.getenv('PRICE_CHANNEL_ID'))
 HASHRATE_CHANNEL_ID = int(os.getenv('HASHRATE_CHANNEL_ID'))
 MARKETCAP_CHANNEL_ID = int(os.getenv('MARKETCAP_CHANNEL_ID'))
+HOOSAT_LISTING_WALLET_CHANNEL = int(os.getenv('HOOSAT_LISTING_WALLET_CHANNEL'))
 API_URL = os.getenv('API_URL')
 FUNDING_HTN_WALLET = "hoosat:qqqht7hgt5jay507ragnk73rkjgwvjqzq238krdd9mpfryr6jcah28ejmxruv"
 
@@ -115,10 +116,15 @@ async def update_channel_name():
     if marketcapChannel is None:
         print(f"Channel with ID {MARKETCAP_CHANNEL_ID} not found.")
         return
+    hoosatListingWalletChannel = client.get_channel(HOOSAT_LISTING_WALLET_CHANNEL)
+    if hoosatListingWalletChannel is None:
+        print(f"Channel with ID {HOOSAT_LISTING_WALLET_CHANNEL} not found.")
+        return
     while not client.is_closed():
         await update_price(priceChannel)
         await update_hashrate(hashrateChannel)
         await update_marketcap(marketcapChannel)
+        await update_funding_wallet_balance(hoosatListingWalletChannel)
         await asyncio.sleep(3600)
 
 @client.event
