@@ -9,8 +9,34 @@ PRICE_CHANNEL_ID = int(os.getenv('PRICE_CHANNEL_ID'))
 HASHRATE_CHANNEL_ID = int(os.getenv('HASHRATE_CHANNEL_ID'))
 MARKETCAP_CHANNEL_ID = int(os.getenv('MARKETCAP_CHANNEL_ID'))
 API_URL = os.getenv('API_URL')
+FUNDING_HTN_WALLET = "hoosat:qqqht7hgt5jay507ragnk73rkjgwvjqzq238krdd9mpfryr6jcah28ejmxruv"
 
 client = discord.Client(intents=discord.Intents.default())
+
+async def fetch_htn_wallet_balance(address): 
+    response = requests.get(API_URL + f"/addresses/{address}/balance")
+    data = response.json()
+    balance = int(data['balance']) / 100_000_000
+    return balance
+
+async def update_funding_wallet_balance(channel):
+    try:
+        balance = await fetch_htn_wallet_balance(FUNDING_HTN_WALLET)
+        if balance >= 1_000_000:
+            formatted_balance = f"{balance / 1_000_000:.2f}M"
+        elif balance >= 1_000:
+            formatted_balance = f"{balance / 1_000:.2f}K"
+        else:
+            formatted_balance = f"{balance:.2f}"
+        formatted_balance = formatted_balance.replace('.', '․')
+        activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: ${formatted_balance}")
+        await client.change_presence(activity=activity)
+        new_name = f"💸 ${formatted_balance} HTN LISTING"
+        await channel.edit(name=new_name)
+        print(f"Updated channel name to: {new_name}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 async def fetch_price():
     response = requests.get(API_URL + "/info/price")
@@ -24,7 +50,7 @@ async def update_price(channel):
         formatted_price = f"{price:.6f}".replace('.', '․')
         activity = discord.Activity(type=discord.ActivityType.watching, name=f"Price: ${formatted_price}")
         await client.change_presence(activity=activity)
-        new_name = f"💰 ${formatted_price} USDT"
+        new_name = f"💰 ${formatted_price} HTN"
         await channel.edit(name=new_name)
         print(f"Updated channel name to: {new_name}")
     except Exception as e:
