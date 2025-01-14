@@ -29,7 +29,7 @@ async def update_funding_wallet_balance(channel):
             formatted_balance = f"{balance / 1_000:.2f}K"
         else:
             formatted_balance = f"{balance:.2f}"
-        formatted_balance = formatted_balance.replace('.', '․')
+            formatted_balance = formatted_balance.replace('.', '․')
         activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: {formatted_balance}")
         await client.change_presence(activity=activity)
         new_name = f"💸 ${formatted_balance} HTN LISTING"
@@ -125,7 +125,7 @@ async def update_channel_name():
         await update_hashrate(hashrateChannel)
         await update_marketcap(marketcapChannel)
         await update_funding_wallet_balance(hoosatListingWalletChannel)
-        await asyncio.sleep(3600)
+        await asyncio.sleep(60)
 
 @client.event
 async def on_ready():
