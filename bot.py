@@ -40,7 +40,7 @@ async def fetch_tron_usdt_wallet_balance(wallet_address, contract_address="TR7NH
 
 async def update_funding_tron_usdt_wallet_balance(channel):
     try:
-        balance = await fetch_htn_wallet_balance(FUNDING_HTN_WALLET)
+        balance = await fetch_tron_usdt_wallet_balance(FUNDUNG_TRON_USDT_WALLET)
         if balance >= 1_000_000:
             formatted_balance = f"{balance / 1_000_000:.2f}M"
         elif balance >= 1_000:
@@ -50,7 +50,7 @@ async def update_funding_tron_usdt_wallet_balance(channel):
         formatted_balance = formatted_balance.replace('.', '․')
         activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: {formatted_balance}")
         await client.change_presence(activity=activity)
-        new_name = f"💸 {formatted_balance} TRX-USDT LISTING"
+        new_name = f"💸 {formatted_balance} TRC20 USDT"
         await channel.edit(name=new_name)
         print(f"Updated channel name to: {new_name}")
 
@@ -79,7 +79,7 @@ async def update_funding_htn_wallet_balance(channel):
         formatted_balance = formatted_balance.replace('.', '․')
         activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: {formatted_balance}")
         await client.change_presence(activity=activity)
-        new_name = f"💸 {formatted_balance} HTN LISTING"
+        new_name = f"💸 {formatted_balance} HTN"
         await channel.edit(name=new_name)
         print(f"Updated channel name to: {new_name}")
 
