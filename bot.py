@@ -11,16 +11,62 @@ MARKETCAP_CHANNEL_ID = int(os.getenv('MARKETCAP_CHANNEL_ID'))
 HOOSAT_LISTING_WALLET_CHANNEL = int(os.getenv('HOOSAT_LISTING_WALLET_CHANNEL'))
 API_URL = os.getenv('API_URL')
 FUNDING_HTN_WALLET = "hoosat:qqqht7hgt5jay507ragnk73rkjgwvjqzq238krdd9mpfryr6jcah28ejmxruv"
+FUNDUNG_TRON_USDT_WALLET = "TQQzQS1hepsZNuCdhBnGYryCCDegpiASHm"
 
 client = discord.Client(intents=discord.Intents.default())
 
-async def fetch_htn_wallet_balance(address): 
-    response = requests.get(API_URL + f"/addresses/{address}/balance")
-    data = response.json()
-    balance = int(data['balance']) / 100_000_000
-    return balance
+async def fetch_tron_usdt_wallet_balance(wallet_address, contract_address="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"): 
+    url = "https://api.trongrid.io/v1/accounts"
+    try:
+        response = requests.get(f"{url}/{wallet_address}")
+        response.raise_for_status()
+        data = response.json()
+        
+        # Access the trc20 token balances
+        trc20_tokens = data.get("data", [{}])[0].get("trc20", [])
+        for token in trc20_tokens:
+            if contract_address in token:
+                # Convert balance from Sun (10^6 precision) to USDT value
+                balance = int(token[contract_address]) / (10 ** 6)
+                return balance
 
-async def update_funding_wallet_balance(channel):
+        # Return 0.0 if no balance found for the specified contract
+        return 0.0
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return None
+
+async def update_funding_tron_usdt_wallet_balance(channel):
+    try:
+        balance = await fetch_htn_wallet_balance(FUNDING_HTN_WALLET)
+        if balance >= 1_000_000:
+            formatted_balance = f"{balance / 1_000_000:.2f}M"
+        elif balance >= 1_000:
+            formatted_balance = f"{balance / 1_000:.2f}K"
+        else:
+            formatted_balance = f"{balance:.2f}"
+        formatted_balance = formatted_balance.replace('.', '․')
+        activity = discord.Activity(type=discord.ActivityType.watching, name=f"Balance: {formatted_balance}")
+        await client.change_presence(activity=activity)
+        new_name = f"💸 {formatted_balance} TRX-USDT LISTING"
+        await channel.edit(name=new_name)
+        print(f"Updated channel name to: {new_name}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+async def fetch_htn_wallet_balance(address): 
+    try:
+        response = requests.get(API_URL + f"/addresses/{address}/balance")
+        data = response.json()
+        balance = int(data['balance']) / 100_000_000
+        return balance
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return None
+
+async def update_funding_htn_wallet_balance(channel):
     try:
         balance = await fetch_htn_wallet_balance(FUNDING_HTN_WALLET)
         if balance >= 1_000_000:
@@ -120,11 +166,16 @@ async def update_channel_name():
     if hoosatListingWalletChannel is None:
         print(f"Channel with ID {HOOSAT_LISTING_WALLET_CHANNEL} not found.")
         return
+    tronUSDTListingWalletChannel = client.get_channel(TRON_USDT_LISTING_WALLET_CHANNEL)
+    if tronUSDTListingWalletChannel is None:
+        print(f"Channel with ID {TRON_USDT_LISTING_WALLET_CHANNEL} not found.")
+        return
     while not client.is_closed():
         await update_price(priceChannel)
         await update_hashrate(hashrateChannel)
         await update_marketcap(marketcapChannel)
-        await update_funding_wallet_balance(hoosatListingWalletChannel)
+        await update_funding_htn_wallet_balance(hoosatListingWalletChannel)
+        await update_funding_tron_usdt_wallet_balance(tronUSDTListingWalletChannel)
         await asyncio.sleep(60)
 
 @client.event
