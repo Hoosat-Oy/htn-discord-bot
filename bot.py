@@ -114,12 +114,19 @@ async def fetch_hashrate():
 
 async def update_hashrate(channel):
     try:
-        hashrate = await fetch_hashrate()
-        formatted_hashrate = f"{hashrate:.2f}".replace('.', '․')
-        activity = discord.Activity(type=discord.ActivityType.watching, name=f"Hashrate: {formatted_hashrate} Th/s")
+        hashrate = await fetch_hashrate()  # currently in TH/s
+        mh_hashrate = hashrate * 1_000_000  # convert to MH/s
+
+        formatted_hashrate = f"{mh_hashrate:.2f}".replace('.', '․')
+        activity = discord.Activity(
+            type=discord.ActivityType.watching,
+            name=f"Hashrate: {formatted_hashrate} MH/s"
+        )
         await client.change_presence(activity=activity)
-        new_name = f"⛏️ {formatted_hashrate} Th/s"
+
+        new_name = f"⛏️ {formatted_hashrate} MH/s"
         await channel.edit(name=new_name)
+
         print(f"Updated channel name to: {new_name}")
     except Exception as e:
         print(f"An error occurred: {e}")
