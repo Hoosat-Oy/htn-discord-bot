@@ -115,6 +115,7 @@ async def fetch_hashrate():
 async def update_hashrate(channel):
     try:
         hashrate = await fetch_hashrate()  # currently in TH/s
+        hashrate = hashrate * 5; # 5 bps hashrate adjustment
         mh_hashrate = hashrate * 1_000_000  # convert to MH/s
 
         formatted_hashrate = f"{mh_hashrate:.2f}".replace('.', '․')
