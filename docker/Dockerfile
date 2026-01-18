@@ -5,9 +5,13 @@ FROM python:3.11-slim
 WORKDIR /app
 
 ENV TOKEN=""
+ENV API_URL="https://api.network.hoosat.fi"
 ENV PRICE_CHANNEL_ID=""
 ENV HASHRATE_CHANNEL_ID=""
-ENV API_URL="https://api.network.hoosat.fi"
+ENV MARKETCAP_CHANNEL_ID=""
+ENV HOOSAT_LISTING_WALLET_CHANNEL=""
+ENV TRON_USDT_LISTING_WALLET_CHANNEL=""
+ENV GUILD_ID=""
 
 # Copy the requirements.txt file into the container
 COPY requirements.txt .
